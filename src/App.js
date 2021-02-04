@@ -10,6 +10,7 @@ function App() {
   //using at component provider
   const provider = new firebase.auth.GoogleAuthProvider();
   //default value
+  const [newUser , setNewUser] = useState(false);
   const [user , setUser] = useState({
     isSignIn : false,
     name : '',
@@ -61,7 +62,7 @@ function App() {
 
   const handleSubmit = (event) =>{
 
-    if(user.name && user.password && user.email){
+    if(user.name && user.password && user.email && newUser){
                    
       firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
      .then((res) => {
@@ -81,6 +82,29 @@ function App() {
          setUser(newUser);
           // ..
         });
+
+    }
+
+    if(user.name && user.password && user.email && !newUser){
+
+      firebase.auth().signInWithEmailAndPassword(user.email,user.password)
+  .then((res) => {
+    var value = res.user;
+    //  console.log(value)
+ // ...
+ const newUser = {...user};
+ newUser.error ='';
+ newUser.success = true;
+ setUser(newUser);
+    // ...
+  })
+  .catch((error) => {
+    const newUser = {...user};
+    newUser.error = error.message;
+    newUser.success = false;
+    setUser(newUser);
+     // ..
+  });
 
     }
    
@@ -108,6 +132,8 @@ event.preventDefault();
       setUser(newUser);
     }
   }
+
+  
   return (
     <div className="App">
              {
@@ -122,9 +148,11 @@ event.preventDefault();
              }
 
              <h1>Our own authentication</h1>
-            
+            <input type="checkbox" onChange ={ ()=> setNewUser(! newUser)} name="newUser" id=""/>
+            <label htmlFor="newUser">Registration</label>
              <form onSubmit = {handleSubmit}>
-                    <input type="text" onBlur = {handleChange}  name = "name"placeholder = "your name" required/><br/>
+                  {newUser &&   <input type="text" onBlur = {handleChange}  name = "name"placeholder = "your name" required/>}
+                  <br/>
                     <input type="email" onBlur = {handleChange}  name = "email"placeholder = "Your email" required/><br/>
                     <input type="password" onBlur = {handleChange}  name="password" id="" placeholder = "password " required/>
                     <br/>
